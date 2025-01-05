@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scorePoint: 16
   _rank: 8
-  _nextObject: {fileID: 6257808292423850615, guid: 56252aecfeed3c8438a5268aeeaf494f, type: 3}
+  _nextObject: {fileID: 2056098513307088438, guid: 206cc29ac2fe49e4781a81a946d8b938, type: 3}
