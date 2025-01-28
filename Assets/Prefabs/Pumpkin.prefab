@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 383449931965459547}
   - component: {fileID: 1209931159803990484}
   - component: {fileID: 2432825170121167309}
-  - component: {fileID: 428481160614093187}
   - component: {fileID: 5993889245663481042}
   - component: {fileID: 1801739840454328268}
   - component: {fileID: 1796892525940420392}
   - component: {fileID: 8479579742520547647}
+  - component: {fileID: 6635706427398681671}
   m_Layer: 0
   m_Name: Pumpkin
   m_TagString: MergeObject
@@ -89,27 +89,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &428481160614093187
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2357894901100412314}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.3386622, y: 0.2532934, z: 0.34434423}
-  m_Center: {x: -0.00022625923, y: -0.00008139759, z: -0.00018264353}
 --- !u!54 &5993889245663481042
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -183,6 +162,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f09b74509251e514f94eea830b61a395, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!64 &6635706427398681671
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2357894901100412314}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -3339082285309697363, guid: 01a647d07ea2c9544a4ebba6208c2ed3, type: 3}
 --- !u!1001 &6224247613249843795
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -193,15 +194,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.x
-      value: 24.136095
+      value: 4.4974947
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.y
-      value: 24.1361
+      value: 4.4974957
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.z
-      value: 24.136095
+      value: 4.4974947
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalPosition.x

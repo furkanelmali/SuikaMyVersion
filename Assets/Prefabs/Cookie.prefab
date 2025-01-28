@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 123152463223896661}
   - component: {fileID: 2261825797075233308}
   - component: {fileID: 529155701806435555}
-  - component: {fileID: 2782997968637199405}
   - component: {fileID: 7758676913064357513}
   - component: {fileID: 5581892156425881784}
   - component: {fileID: 2248609004100391280}
   - component: {fileID: 4305986903308625806}
+  - component: {fileID: 1439616350131639877}
   m_Layer: 0
   m_Name: Cookie
   m_TagString: MergeObject
@@ -89,27 +89,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2782997968637199405
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 471685608435919422}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.11385158, y: 0.021420937, z: 0.1156959}
-  m_Center: {x: -0.00027771667, y: 0.012817081, z: -0.0002290681}
 --- !u!54 &7758676913064357513
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -183,6 +162,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f09b74509251e514f94eea830b61a395, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!64 &1439616350131639877
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 471685608435919422}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1354631672181299356, guid: da710866c27b3ac44b4893c9463856c4, type: 3}
 --- !u!1001 &1543305027128475594
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -193,15 +194,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.x
-      value: 6.8244677
+      value: 1.3958439
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.y
-      value: 6.824469
+      value: 1.3958441
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.z
-      value: 6.8244677
+      value: 1.3958439
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalPosition.x

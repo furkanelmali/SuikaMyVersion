@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 666658930976962700}
   - component: {fileID: 3601653145484413037}
   - component: {fileID: 2168754096261255243}
-  - component: {fileID: 4929059093933860576}
   - component: {fileID: 3145083673725294791}
   - component: {fileID: 6994218106678853547}
   - component: {fileID: 2717848746663139736}
   - component: {fileID: 7514368785041609693}
+  - component: {fileID: 7442823106968520780}
   m_Layer: 0
   m_Name: Apple
   m_TagString: MergeObject
@@ -89,27 +89,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &4929059093933860576
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7706942162949656646}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.10338468, y: 0.121037394, z: 0.108704925}
-  m_Center: {x: 0.00003996864, y: 0.007835953, z: 0.000018501654}
 --- !u!54 &3145083673725294791
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -183,6 +162,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f09b74509251e514f94eea830b61a395, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!135 &7442823106968520780
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7706942162949656646}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.054980014
+  m_Center: {x: 0.000039969083, y: -0.002957264, z: -0.00033095703}
 --- !u!1001 &8750763939667494591
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -193,15 +193,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.x
-      value: 12.117642
+      value: 1.393579
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.y
-      value: 12.117645
+      value: 1.3935794
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.z
-      value: 12.117642
+      value: 1.393579
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalPosition.x

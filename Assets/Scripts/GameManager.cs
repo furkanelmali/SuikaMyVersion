@@ -9,10 +9,10 @@ using System;
 public class GameManager : MonoBehaviour
 {
     int Score, highScore, dailyHighScore;
-    public TextMeshProUGUI scoreMesh, highScoreMesh;
+    public TextMeshProUGUI scoreMesh, highScoreMesh, restartSceneScoreMesh;
     public GameObject[] allInScene;
-
     
+
     // Start is called before the first frame update
     void Start()
     {
@@ -90,7 +90,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         SettingHighScore();
         SettingDailyHighScore();
-        SceneManager.LoadScene(0);
+        restartSceneScoreMesh.text = Score.ToString();
+        UIManager.FindObjectOfType<UIManager>().GameOverScene();
     }
 
     

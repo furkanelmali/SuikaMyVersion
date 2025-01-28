@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 6678693481012809497}
   - component: {fileID: 8256916185289200215}
   - component: {fileID: 2575086317199760565}
-  - component: {fileID: 8345861853857056164}
   - component: {fileID: 985609006315622}
   - component: {fileID: 1922598880360712362}
   - component: {fileID: 5866617856074796504}
   - component: {fileID: 7602631622257106732}
+  - component: {fileID: 5057031004845856349}
   m_Layer: 0
   m_Name: CoffeCup
   m_TagString: MergeObject
@@ -89,27 +89,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8345861853857056164
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1176063199494549452}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.12081248, y: 0.152305, z: 0.12081248}
-  m_Center: {x: 0, y: 0.07999416, z: 0}
 --- !u!54 &985609006315622
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -183,6 +162,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f09b74509251e514f94eea830b61a395, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!64 &5057031004845856349
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176063199494549452}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1016011637710242029, guid: 5e87ddfd4564feb4689769f649055178, type: 3}
 --- !u!1001 &6062878670357737171
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -193,15 +194,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.x
-      value: 12.91667
+      value: 2.5071867
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.y
-      value: 12.916673
+      value: 2.5071874
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalScale.z
-      value: 12.91667
+      value: 2.5071867
       objectReference: {fileID: 0}
     - target: {fileID: 8335925408440948382, guid: a3f7c3893584c1b46a176015dd7186e7, type: 3}
       propertyPath: m_LocalPosition.x

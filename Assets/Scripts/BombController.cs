@@ -56,7 +56,7 @@ public class BombController : MonoBehaviour
             {
                 if (hit.transform == transform)
                 {   
-                    this.gameObject.GetComponentInChildren<Animator>().enabled = false;
+                    this.gameObject.GetComponent<Animator>().enabled = false;
                     isDragging = true;
                     playerController.enabled = false;
                     radius = 3f;
