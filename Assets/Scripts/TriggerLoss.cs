@@ -14,28 +14,17 @@ public class TriggerLoss : MonoBehaviour
     void Start()
     {
         gameManager = GameManager.Instance ?? FindObjectOfType<GameManager>();
-        Debug.Log($"[TriggerLoss] Start. gameManager bulundu mu: {gameManager != null}. Collider isTrigger: {GetComponent<Collider>()?.isTrigger}");
     }
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"[TriggerLoss] OnTriggerEnter -> {other.name} (tag: {other.tag})");
-
         if (IsValidMergeObject(other))
-        {
             objectsInZone.Add(other.gameObject);
-            Debug.Log($"[TriggerLoss] '{other.name}' bolgeye eklendi. Bolgedeki obje sayisi: {objectsInZone.Count}");
-        }
-        else
-        {
-            Debug.Log($"[TriggerLoss] '{other.name}' gecerli MergeObject degil, sayilmadi.");
-        }
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (objectsInZone.Remove(other.gameObject))
-            Debug.Log($"[TriggerLoss] '{other.name}' bolgeden cikti. Kalan obje sayisi: {objectsInZone.Count}");
+        objectsInZone.Remove(other.gameObject);
 
         if (objectsInZone.Count == 0)
         {
@@ -64,12 +53,9 @@ public class TriggerLoss : MonoBehaviour
         stayTime += Time.deltaTime;
         DangerZoneFeedback.Instance?.SetDangerProgress(stayTime, LossDelay);
 
-        Debug.Log($"[TriggerLoss] Bolgede {objectsInZone.Count} obje var. stayTime: {stayTime:F2} / {LossDelay}");
-
         if (stayTime >= LossDelay)
         {
             gameOverTriggered = true;
-            Debug.Log("[TriggerLoss] SURE DOLDU -> GameOver() cagriliyor!");
             gameManager.GameOver();
         }
     }
@@ -85,10 +71,7 @@ public class TriggerLoss : MonoBehaviour
 
         Rigidbody rb = other.attachedRigidbody;
         if (rb != null && !rb.useGravity)
-        {
-            Debug.Log($"[TriggerLoss] '{other.name}' henuz birakilmamis (gravity kapali), sayilmiyor.");
             return false;
-        }
 
         return true;
     }

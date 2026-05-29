@@ -5,7 +5,8 @@ using DG.Tweening;
 
 public class MergeJuice : MonoBehaviour
 {
-    public static MergeJuice Instance { get; private set; }
+    static MergeJuice _instance;
+    public static MergeJuice Instance => _instance != null ? _instance : null;
 
     [SerializeField] GameObject floatingScorePrefab;
     [SerializeField] int floatingScorePoolSize = 5;
@@ -15,15 +16,21 @@ public class MergeJuice : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(gameObject);
             return;
         }
-        Instance = this;
+        _instance = this;
 
         EnsureFloatingScoreSetup();
         BuildFloatingScorePool();
+    }
+
+    void OnDestroy()
+    {
+        if (_instance == this)
+            _instance = null;
     }
 
     void EnsureFloatingScoreSetup()

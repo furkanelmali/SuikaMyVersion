@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -63,6 +63,9 @@ public class GameManager : MonoBehaviour
 
         if (playerController != null)
             playerController.controller = false;
+
+        DangerZoneFeedback.Instance?.Reset();
+        CameraShake.Instance?.StopDangerShake();
 
         StartCoroutine(EndGameSequent());
     }

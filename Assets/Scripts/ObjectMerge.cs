@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ObjectMerge : MonoBehaviour
 {
@@ -86,6 +86,13 @@ public class ObjectMerge : MonoBehaviour
             if (hasMerged || otherObject.hasMerged)
                 return;
 
+            // Claim the merge immediately so neither object can merge again
+            // (prevents re-entrancy / duplicate-spawn within the same physics step).
+            hasMerged = true;
+            otherObject.hasMerged = true;
+
+            int mergedRank = controller.rank;
+            int scoreGained = controller.scorePoint;
             Vector3 mergePosition = (transform.position + otherObject.transform.position) / 2;
 
             if (nextRankPrefab != null)
@@ -104,18 +111,16 @@ public class ObjectMerge : MonoBehaviour
                     foreach (Collider c in mergedObject.GetComponents<Collider>())
                         c.enabled = true;
 
-                    MergeJuice.Instance?.PlayMergeEffects(mergedObject, controller.rank, controller.scorePoint);
+                    MergeJuice.Instance?.PlayMergeEffects(mergedObject, mergedRank, scoreGained);
                 }
             }
 
+            ReleaseOrDestroy(otherObject.gameObject);
             ReleaseOrDestroy(gameObject);
-            ReleaseOrDestroy(collision.gameObject);
 
-            hasMerged = true;
-            otherObject.hasMerged = true;
-
-            gameManager.AddScore(controller.scorePoint);
-            PlayMergeSound(controller.rank);
+            if (gameManager != null)
+                gameManager.AddScore(scoreGained);
+            PlayMergeSound(mergedRank);
         }
         else
         {

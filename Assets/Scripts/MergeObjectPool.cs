@@ -9,6 +9,9 @@ public class MergeObjectPool : MonoBehaviour
     Transform poolRoot;
 
     readonly Dictionary<GameObject, Queue<GameObject>> poolsByPrefab = new Dictionary<GameObject, Queue<GameObject>>();
+    // Guards against the same instance being enqueued more than once (double-release),
+    // which would let Get() hand out the same live object to multiple callers.
+    readonly HashSet<GameObject> pooledObjects = new HashSet<GameObject>();
 
     void Awake()
     {
@@ -35,6 +38,10 @@ public class MergeObjectPool : MonoBehaviour
             for (int i = 0; i < prewarmPerPrefab; i++)
             {
                 GameObject instance = CreateInstance(prefab);
+                // Tag the prewarmed instance so Release() pools it instead of destroying it.
+                ObjectController controller = instance.GetComponent<ObjectController>();
+                if (controller != null)
+                    controller.poolPrefabKey = prefab;
                 Release(instance);
             }
         }
@@ -76,18 +83,27 @@ public class MergeObjectPool : MonoBehaviour
         if (!poolsByPrefab.ContainsKey(prefab))
             poolsByPrefab[prefab] = new Queue<GameObject>();
 
-        GameObject obj;
-        if (poolsByPrefab[prefab].Count > 0)
+        Queue<GameObject> queue = poolsByPrefab[prefab];
+        GameObject obj = null;
+
+        // Pull a valid, currently-pooled instance from the queue.
+        while (queue.Count > 0)
         {
-            obj = poolsByPrefab[prefab].Dequeue();
-            obj.transform.SetPositionAndRotation(position, rotation);
-            obj.SetActive(true);
+            GameObject candidate = queue.Dequeue();
+            if (candidate == null)
+                continue;
+
+            pooledObjects.Remove(candidate);
+            obj = candidate;
+            break;
         }
-        else
-        {
+
+        if (obj == null)
             obj = CreateInstance(prefab);
-            obj.transform.SetPositionAndRotation(position, rotation);
-        }
+
+        obj.transform.SetParent(null);
+        obj.transform.SetPositionAndRotation(position, rotation);
+        obj.SetActive(true);
 
         ObjectController controller = obj.GetComponent<ObjectController>();
         if (controller != null)
@@ -107,11 +123,17 @@ public class MergeObjectPool : MonoBehaviour
         if (obj == null)
             return;
 
+        // Already pooled -> ignore. This is the key guard against the
+        // "thousands of objects" / duplicate-spawn explosion.
+        if (!pooledObjects.Add(obj))
+            return;
+
         ObjectController controller = obj.GetComponent<ObjectController>();
         GameObject prefabKey = controller != null ? controller.poolPrefabKey : null;
 
         if (prefabKey == null)
         {
+            pooledObjects.Remove(obj);
             Destroy(obj);
             return;
         }
@@ -122,8 +144,7 @@ public class MergeObjectPool : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.UnregisterMergeObject(obj);
 
-        if (controller != null)
-            controller.ResetForPool();
+        controller.ResetForPool();
 
         ObjectMerge merge = obj.GetComponent<ObjectMerge>();
         merge?.ResetForPool();
