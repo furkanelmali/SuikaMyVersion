@@ -1,99 +1,146 @@
-using System.Collections;
-using System.Collections.Generic;
-using GoogleMobileAds.Api;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
-    public GameObject wChef,mChef;
-    public GameObject MainMenu, ResetMenu, OptionsMenu, GameMenu, LeaderBoard,RestartMenu;
+    public GameObject wChef, mChef;
+    public GameObject MainMenu, ResetMenu, OptionsMenu, GameMenu, LeaderBoard, RestartMenu;
     PlayerController playerController;
     PostProcessVolume postProcessVolume;
     private DepthOfField depthOfField;
     BannerAd bannerAd;
     bool isThereABanner = false;
-    InterstitialAdd InterstitialAdd;
+    InterstitialAdd interstitialAdd;
+    bool waitingForInterstitial;
 
     public int ResetNum;
-    
 
-    // Start is called before the first frame update
     void Start()
     {
         playerController = FindObjectOfType<PlayerController>();
         postProcessVolume = FindObjectOfType<PostProcessVolume>();
         bannerAd = FindObjectOfType<BannerAd>();
-        InterstitialAdd = FindObjectOfType<InterstitialAdd>();
-        postProcessVolume.profile.TryGetSettings(out depthOfField);
-        if(PlayerPrefs.GetInt("ResetNum") == 0) 
+        interstitialAdd = FindObjectOfType<InterstitialAdd>();
+
+        if (postProcessVolume != null)
+            postProcessVolume.profile.TryGetSettings(out depthOfField);
+
+        if (AdsManager.Instance == null)
         {
-            MainMenu.SetActive(true);
+            GameObject adsObject = new GameObject("AdsManager");
+            adsObject.AddComponent<AdsManager>();
         }
-        if (PlayerPrefs.GetInt("ResetNum") == 1) 
+
+        AdsManager.Instance.OnInterstitialClosed += OnInterstitialClosed;
+        AdsManager.Instance.OnInterstitialFailed += OnInterstitialClosed;
+
+        if (PlayerPrefs.GetInt("ResetNum") == 0)
+            MainMenu.SetActive(true);
+
+        if (PlayerPrefs.GetInt("ResetNum") == 1)
         {
             ResetNum = 0;
             PlayerPrefs.SetInt("ResetNum", ResetNum);
-            GameMenu.SetActive(true);        
+            GameMenu.SetActive(true);
         }
     }
 
-    // Update is called once per frame
+    void OnDestroy()
+    {
+        if (AdsManager.Instance != null)
+        {
+            AdsManager.Instance.OnInterstitialClosed -= OnInterstitialClosed;
+            AdsManager.Instance.OnInterstitialFailed -= OnInterstitialClosed;
+        }
+    }
+
     void Update()
     {
         SettingTimeScale();
     }
 
-    public void ChefChanger() 
+    public void ChefChanger()
     {
-        if (mChef.activeSelf) 
+        if (mChef.activeSelf)
         {
             mChef.SetActive(false);
             wChef.SetActive(true);
         }
-        else 
+        else
         {
             mChef.SetActive(true);
             wChef.SetActive(false);
         }
     }
-    public void GameOverScene() 
+
+    public void GameOverScene()
     {
-        InterstitialAdd.ShowInterstitialAd();
         GameMenu.SetActive(false);
+        RestartMenu.SetActive(false);
+        waitingForInterstitial = true;
+
+        bool shown = AdsManager.Instance != null && AdsManager.Instance.TryShowInterstitial();
+        if (!shown)
+            OnInterstitialClosed();
+    }
+
+    void OnInterstitialClosed()
+    {
+        if (!waitingForInterstitial)
+            return;
+
+        waitingForInterstitial = false;
         RestartMenu.SetActive(true);
     }
-    public void SettingTimeScale() 
+
+    public void SettingTimeScale()
     {
-        if (GameMenu.activeSelf) 
+        if (GameMenu.activeSelf)
         {
-            depthOfField.active = false;
-            playerController.enabled = true;
+            if (depthOfField != null)
+                depthOfField.active = false;
+
+            if (playerController != null)
+                playerController.enabled = true;
+
             if (isThereABanner)
             {
-                bannerAd.DestroyAd();
+                if (bannerAd != null)
+                    bannerAd.DestroyAd();
+                else if (AdsManager.Instance != null)
+                    AdsManager.Instance.HideBanner();
+
                 isThereABanner = false;
             }
         }
-        else 
+        else
         {
-            depthOfField.active = true;
-            playerController.enabled = false;
+            if (depthOfField != null)
+                depthOfField.active = true;
+
+            if (playerController != null)
+                playerController.enabled = false;
+
             if (!isThereABanner)
             {
-                bannerAd.LoadAd();
+                if (bannerAd != null)
+                    bannerAd.LoadAd();
+                else if (AdsManager.Instance != null)
+                    AdsManager.Instance.ShowBanner();
+
                 isThereABanner = true;
             }
         }
     }
 
-    public void MainMenuBtn() 
+    public void MainMenuBtn()
     {
         ResetNum = 0;
         PlayerPrefs.SetInt("ResetNum", ResetNum);
         SceneManager.LoadScene(0);
     }
+
     public void Restart()
     {
         ResetNum = 1;

@@ -1,9 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Rendering;
 
 public class ObjectSpawner : MonoBehaviour
 {
@@ -14,25 +10,32 @@ public class ObjectSpawner : MonoBehaviour
     public GameObject dropBox;
     public float currentObjectDimension;
 
-    Collider[] collidersInSpawnedObjects;
     public GameObject[] nextObjectImages;
+
+    PlayerController playerController;
+    MergeObjectPool mergeObjectPool;
+
     void Start()
     {
-
         dropBox = GameObject.FindGameObjectWithTag("DropBox");
+        playerController = FindObjectOfType<PlayerController>();
+        mergeObjectPool = FindObjectOfType<MergeObjectPool>();
+
+        if (mergeObjectPool == null)
+        {
+            GameObject poolObject = new GameObject("MergeObjectPool");
+            mergeObjectPool = poolObject.AddComponent<MergeObjectPool>();
+        }
+
+        mergeObjectPool.RegisterPrefabChain(objectsToSpawn);
+
         spawnNumber = 0;
         SpawnObject(spawnPosition.position, spawnRotation);
         spawnOrder = 1;
     }
 
-    private void Update()
-    {
-
-    }
-
     public IEnumerator DelayedSpawn()
     {
-        Debug.Log("Object Delayed Spawned.");
         yield return new WaitForSeconds(1f);
         SpawnObject(spawnPosition.position, spawnRotation);
     }
@@ -40,53 +43,41 @@ public class ObjectSpawner : MonoBehaviour
     public void SpawnObject(Vector3 position, Quaternion rotation)
     {
         spawnNumber = nextObjectSpawning;
-        if (objectsToSpawn[spawnNumber] != null)
-        {
-            GameObject spawnedObject = Instantiate(objectsToSpawn[spawnNumber], position, rotation);
-            FindObjectOfType<PlayerController>().currentFallObject = spawnedObject;
-
-            spawnedObject.transform.SetParent(dropBox.transform, false);
-            spawnedObject.transform.position = position;
-            spawnedObject.transform.rotation = rotation;
-            currentObjectDimension = spawnedObject.GetComponent<ObjectController>().objectDimension;
-
-            Debug.Log("Object Spawned.");
-            spawnOrder++;
-            ChoosingSpawnObject();
-
-
-        }
-        else
+        GameObject prefab = objectsToSpawn[spawnNumber];
+        if (prefab == null)
         {
             Debug.LogError("objectToSpawn is not assigned.");
+            return;
         }
 
+        GameObject spawnedObject = mergeObjectPool != null
+            ? mergeObjectPool.Get(prefab, position, rotation)
+            : Instantiate(prefab, position, rotation);
 
+        if (playerController != null)
+            playerController.currentFallObject = spawnedObject;
 
+        spawnedObject.transform.SetParent(dropBox.transform, false);
+        spawnedObject.transform.position = position;
+        spawnedObject.transform.rotation = rotation;
+        currentObjectDimension = spawnedObject.GetComponent<ObjectController>().objectDimension;
+
+        spawnOrder++;
+        ChoosingSpawnObject();
     }
 
     void ChoosingSpawnObject()
     {
         if (spawnOrder <= 3)
-        {
             nextObjectSpawning = 0;
-        }
         else if (spawnOrder == 4)
-        {
             nextObjectSpawning = 1;
-        }
         else if (spawnOrder == 5)
-        {
             nextObjectSpawning = 2;
-        }
         else if (spawnOrder == 7)
-        {
             nextObjectSpawning = 3;
-        }
         else if (spawnOrder > 7)
-        {
             nextObjectSpawning = Random.Range(0, 5);
-        }
 
         activatingNextObjectsImage();
     }
@@ -94,15 +85,6 @@ public class ObjectSpawner : MonoBehaviour
     void activatingNextObjectsImage()
     {
         for (int i = 0; i < 5; i++)
-        {
-            if (i == nextObjectSpawning)
-            {
-                nextObjectImages[i].active = true;
-            }
-            else
-            {
-                nextObjectImages[i].active = false;
-            }
-        }
+            nextObjectImages[i].active = i == nextObjectSpawning;
     }
 }

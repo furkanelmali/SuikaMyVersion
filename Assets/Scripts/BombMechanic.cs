@@ -1,21 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BombMechanic : MonoBehaviour
 {
     float detectionRadius = 2;
     Collider[] objectsInRange;
-   
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, 3);
-    }
-
-    void Update()
-    {
-        
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 
     public void ObjectDestroyer()
@@ -24,10 +17,15 @@ public class BombMechanic : MonoBehaviour
 
         foreach (Collider obj in objectsInRange)
         {
-            if (obj.gameObject.tag == "MergeObject")
-            { Destroy(obj.gameObject); } 
+            if (!obj.CompareTag("MergeObject"))
+                continue;
+
+            if (MergeObjectPool.Instance != null)
+                MergeObjectPool.Instance.Release(obj.gameObject);
+            else
+                Destroy(obj.gameObject);
         }
 
-        Destroy(this.gameObject);  
+        Destroy(gameObject);
     }
 }
