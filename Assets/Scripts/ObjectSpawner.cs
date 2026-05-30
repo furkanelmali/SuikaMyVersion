@@ -14,6 +14,8 @@ public class ObjectSpawner : MonoBehaviour
 
     PlayerController playerController;
     MergeObjectPool mergeObjectPool;
+    Coroutine spawnCoroutine;
+    static readonly WaitForSeconds SpawnDelay = new WaitForSeconds(1f);
 
     void Start()
     {
@@ -36,8 +38,20 @@ public class ObjectSpawner : MonoBehaviour
 
     public IEnumerator DelayedSpawn()
     {
-        yield return new WaitForSeconds(1f);
+        yield return SpawnDelay;
         SpawnObject(spawnPosition.position, spawnRotation);
+        spawnCoroutine = null;
+    }
+
+    public void BeginDelayedSpawn()
+    {
+        if (spawnCoroutine != null)
+            return;
+
+        if (playerController != null)
+            playerController.NotifyWaitingForSpawn();
+
+        spawnCoroutine = StartCoroutine(DelayedSpawn());
     }
 
     public void SpawnObject(Vector3 position, Quaternion rotation)
@@ -54,13 +68,14 @@ public class ObjectSpawner : MonoBehaviour
             ? mergeObjectPool.Get(prefab, position, rotation)
             : Instantiate(prefab, position, rotation);
 
-        if (playerController != null)
-            playerController.currentFallObject = spawnedObject;
-
         spawnedObject.transform.SetParent(dropBox.transform, false);
         spawnedObject.transform.position = position;
         spawnedObject.transform.rotation = rotation;
-        currentObjectDimension = spawnedObject.GetComponent<ObjectController>().objectDimension;
+        ObjectController objectController = spawnedObject.GetComponent<ObjectController>();
+        currentObjectDimension = objectController != null ? objectController.objectDimension : 0f;
+
+        if (playerController != null)
+            playerController.AssignCurrentObject(spawnedObject);
 
         spawnOrder++;
         ChoosingSpawnObject();
@@ -85,6 +100,6 @@ public class ObjectSpawner : MonoBehaviour
     void activatingNextObjectsImage()
     {
         for (int i = 0; i < 5; i++)
-            nextObjectImages[i].active = i == nextObjectSpawning;
+            nextObjectImages[i].SetActive(i == nextObjectSpawning);
     }
 }

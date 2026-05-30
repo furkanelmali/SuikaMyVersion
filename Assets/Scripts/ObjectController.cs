@@ -22,6 +22,7 @@ public class ObjectController : MonoBehaviour
         defaultLocalScale = transform.localScale;
         SetData();
         rb = GetComponent<Rigidbody>();
+        OptimizeRenderersForMobile();
         collidersInObject = GetComponents<Collider>();
 
         foreach (Collider collider in collidersInObject)
@@ -38,6 +39,19 @@ public class ObjectController : MonoBehaviour
 
         if (rb != null)
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+    }
+
+    void OptimizeRenderersForMobile()
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            renderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
+            renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+        }
     }
 
     float CalculateObjectDimension()

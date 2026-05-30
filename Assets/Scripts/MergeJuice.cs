@@ -13,6 +13,7 @@ public class MergeJuice : MonoBehaviour
     [SerializeField] Transform floatingScoreParent;
 
     readonly Queue<TextMeshProUGUI> floatingScorePool = new Queue<TextMeshProUGUI>();
+    Camera mainCamera;
 
     void Awake()
     {
@@ -22,6 +23,7 @@ public class MergeJuice : MonoBehaviour
             return;
         }
         _instance = this;
+        mainCamera = Camera.main;
 
         EnsureFloatingScoreSetup();
         BuildFloatingScorePool();
@@ -95,7 +97,10 @@ public class MergeJuice : MonoBehaviour
 
     public void ShowFloatingScore(int score, Vector3 worldPosition)
     {
-        if (floatingScorePool.Count == 0 || Camera.main == null)
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
+        if (floatingScorePool.Count == 0 || mainCamera == null)
             return;
 
         TextMeshProUGUI label = floatingScorePool.Dequeue();
@@ -107,7 +112,7 @@ public class MergeJuice : MonoBehaviour
         labelColor.a = 1f;
         label.color = labelColor;
 
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
+        Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPosition);
         rect.position = screenPos;
 
         rect.DOKill();

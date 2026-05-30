@@ -27,6 +27,9 @@ public class GameFeelBootstrap : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);
 
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+
         EnsureManagers();
     }
 

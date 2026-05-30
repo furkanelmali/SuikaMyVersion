@@ -194,7 +194,6 @@ public class DangerZoneFeedback : MonoBehaviour
         if (vignetteImage == null)
             return;
 
-        vignetteImage.DOKill();
         Color c = vignetteImage.color;
         c.a = Mathf.Clamp01(alpha);
         vignetteImage.color = c;

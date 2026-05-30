@@ -8,6 +8,9 @@ public class GradleProcessor : IPostGenerateGradleAndroidProject
 {
     public int callbackOrder { get { return 0; } }
 
+    private const string GMA_ANDROIDLIB_NAMESPACE =
+      "namespace \"com.google.unity.ads.plugin\"";
+
     private const string GMA_PACKAGING_OPTIONS_LAUNCHER =
       "apply from: '../unityLibrary/GoogleMobileAdsPlugin.androidlib/packaging_options.gradle'";
 
@@ -36,6 +39,17 @@ public class GradleProcessor : IPostGenerateGradleAndroidProject
 
         foreach (var gradlepath in gradleList)
         {
+            if (gradlepath.Contains("GoogleMobileAdsPlugin.androidlib/build.gradle") ||
+                gradlepath.Contains("GoogleMobileAdsPlugin.androidlib\\build.gradle"))
+            {
+                var gmaAndroidLibContents = File.ReadAllText(gradlepath);
+                gmaAndroidLibContents = SetAndroidNamespace(
+                    gmaAndroidLibContents,
+                    GMA_ANDROIDLIB_NAMESPACE);
+                File.WriteAllText(gradlepath, gmaAndroidLibContents);
+                continue;
+            }
+
             if (!gradlepath.Contains("unityLibrary/build.gradle") &&
                 !gradlepath.Contains("launcher/build.gradle") &&
                 !gradlepath.Contains("unityLibrary\\build.gradle") &&
@@ -89,6 +103,34 @@ public class GradleProcessor : IPostGenerateGradleAndroidProject
                 File.WriteAllText(gradlePath, contents);
             }
         }
+    }
+
+    private string SetAndroidNamespace(string file, string namespaceLine)
+    {
+        var lines = file.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var newFile = "";
+        var namespaceSet = false;
+        foreach (var line in lines)
+        {
+            if (line.TrimStart().StartsWith("namespace "))
+            {
+                if (!namespaceSet)
+                {
+                    newFile += "    " + namespaceLine + Environment.NewLine;
+                    namespaceSet = true;
+                }
+                continue;
+            }
+
+            newFile += line + Environment.NewLine;
+            if (!namespaceSet && line.Trim().Equals("android {"))
+            {
+                newFile += "    " + namespaceLine + Environment.NewLine;
+                namespaceSet = true;
+            }
+        }
+
+        return newFile;
     }
 
     private string DeleteLineContainingSubstring(string file, string substring)

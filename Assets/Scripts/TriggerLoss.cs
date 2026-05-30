@@ -13,6 +13,12 @@ public class TriggerLoss : MonoBehaviour
 
     void Start()
     {
+        if (CompareTag("MergeObject"))
+        {
+            enabled = false;
+            return;
+        }
+
         gameManager = GameManager.Instance ?? FindObjectOfType<GameManager>();
     }
 

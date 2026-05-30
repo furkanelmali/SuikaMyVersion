@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     bool isThereABanner = false;
     InterstitialAdd interstitialAdd;
     bool waitingForInterstitial;
+    bool? lastGameMenuState;
 
     public int ResetNum;
 
@@ -44,6 +45,8 @@ public class UIManager : MonoBehaviour
             PlayerPrefs.SetInt("ResetNum", ResetNum);
             GameMenu.SetActive(true);
         }
+
+        ApplyGameMenuState(force: true);
     }
 
     void OnDestroy()
@@ -57,7 +60,7 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
-        SettingTimeScale();
+        ApplyGameMenuState(force: false);
     }
 
     public void ChefChanger()
@@ -96,7 +99,18 @@ public class UIManager : MonoBehaviour
 
     public void SettingTimeScale()
     {
-        if (GameMenu.activeSelf)
+        ApplyGameMenuState(force: true);
+    }
+
+    void ApplyGameMenuState(bool force)
+    {
+        bool isGameActive = GameMenu.activeSelf;
+        if (!force && lastGameMenuState.HasValue && lastGameMenuState.Value == isGameActive)
+            return;
+
+        lastGameMenuState = isGameActive;
+
+        if (isGameActive)
         {
             if (depthOfField != null)
                 depthOfField.active = false;

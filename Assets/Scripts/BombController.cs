@@ -21,6 +21,7 @@ public class BombController : MonoBehaviour
         lineRenderer = GetComponent<LineRenderer>();
         BombMechanic = GetComponent<BombMechanic>();
         playerController = FindObjectOfType<PlayerController>();
+        animator = GetComponent<Animator>();
         
         lineRenderer.positionCount = numSegments + 1;
         lineRenderer.useWorldSpace = false;
@@ -56,37 +57,45 @@ public class BombController : MonoBehaviour
             {
                 if (hit.transform == transform)
                 {   
-                    this.gameObject.GetComponent<Animator>().enabled = false;
+                    if (animator != null)
+                        animator.enabled = false;
                     isDragging = true;
-                    playerController.enabled = false;
                     radius = 3f;
                     DrawCircle();
                     offset = transform.position - GetMouseWorldPosition();
                     transform.position = new Vector3(transform.position.x, transform.position.y, -8f);
-                    playerController.controller = false;
+                    playerController?.SetInputLocked(true);
                 }
             }
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            playerController.enabled = true;        
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
+            bool releasedOnBomb = false;
 
 
             if (Physics.Raycast(ray, out hit))
             {
                 if (hit.transform == transform)
                 {
+                    releasedOnBomb = true;
                     
                     isDragging = false;
                     transform.position = new Vector3(transform.position.x, transform.position.y, -6.43f);
                     DrawCircle();
                     
                     BombMechanic.ObjectDestroyer();
-                    playerController.controller = true;
+                    playerController?.SetInputLocked(false);
                 }
+            }
+
+            if (!releasedOnBomb && isDragging)
+            {
+                isDragging = false;
+                transform.position = new Vector3(transform.position.x, transform.position.y, -6.43f);
+                playerController?.SetInputLocked(false);
             }
         }
 

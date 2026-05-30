@@ -5256,7 +5256,7 @@ Light:
   m_InnerSpotAngle: 7.4
   m_CookieSize2D: {x: 12.92, y: 12.92}
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -5866,7 +5866,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   stopNaNPropagation: 0
   finalBlitToCameraTarget: 1
-  antialiasingMode: 2
+  antialiasingMode: 0
   temporalAntialiasing:
     jitterSpread: 0.1
     sharpness: 1.17
@@ -5878,7 +5878,7 @@ MonoBehaviour:
     fastMode: 0
     keepAlpha: 0
   fog:
-    enabled: 1
+    enabled: 0
     excludeSkybox: 1
   debugLayer:
     lightMeter:
