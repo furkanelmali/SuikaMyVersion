@@ -185,8 +185,11 @@ public class PlayerController : MonoBehaviour
         }
 
         Transform fallTransform = currentFallObject.transform;
-        fallTransform.DOKill();
+        // Complete (not just stop) the spawn pop so the piece never falls at a partial scale.
+        fallTransform.DOKill(true);
         fallTransform.DOPunchScale(Vector3.one * 0.08f, 0.2f, 6, 0.4f);
+        transform.DOKill(true);
+        transform.DOPunchScale(new Vector3(0.12f, -0.12f, 0f), 0.25f, 6, 0.5f);
 
         currentFallController.FallController();
         spawner.BeginDelayedSpawn();
@@ -247,6 +250,8 @@ public class PlayerController : MonoBehaviour
             return;
 
         lastEdgeFeedbackTime = Time.time;
+        // Finish the spawn pop first; a punch started mid-pop would settle at the partial scale.
+        currentFallObject.transform.DOComplete();
         currentFallObject.transform.DOPunchScale(Vector3.one * edgePunchScale, 0.12f, 4, 0.35f);
     }
 

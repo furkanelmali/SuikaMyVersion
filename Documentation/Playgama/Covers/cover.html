@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Merge &amp; Munch covers</title>
+<!-- Store covers. Render one layout per file URL hash: #square (800x800), #portrait (1080x1920), #landscape (1920x1080). -->
+<style>
+@font-face { font-family: 'Lilita One'; src: url('fonts/LilitaOne.ttf'); }
+html, body { margin: 0; background: transparent; }
+.cover { position: relative; overflow: hidden; font-family: 'Lilita One', sans-serif; display: none; }
+body.square .cover.square, body.portrait .cover.portrait, body.landscape .cover.landscape { display: block; }
+.cover.square { width: 800px; height: 800px; --u: 0.74; --cx: 50%; --cy: 44%; }
+.cover.portrait { width: 1080px; height: 1920px; --u: 1; --cx: 50%; --cy: 40%; }
+.cover.landscape { width: 1920px; height: 1080px; --u: 1; --cx: 68%; --cy: 46%; }
+
+/* Sunburst kitchen */
+.bg { position: absolute; inset: 0; background: radial-gradient(circle at var(--cx) var(--cy), #FFF1C9 0%, #FFC6A6 30%, #F48C7E 68%, #D65F70 100%); }
+.rays { position: absolute; inset: -20%; background: repeating-conic-gradient(from 3deg at var(--cx) var(--cy), rgba(255,255,255,0.18) 0deg 8deg, rgba(255,255,255,0) 8deg 16deg); }
+.dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,247,236,0.42) 0 7px, transparent 8px); background-size: 96px 96px; mask-image: radial-gradient(circle at var(--cx) var(--cy), transparent 22%, black 70%); -webkit-mask-image: radial-gradient(circle at var(--cx) var(--cy), transparent 22%, black 70%); }
+.counter { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(#FFD88A 0 10px, #F2B860 10px, #E39C45 60%, #C9803A); box-shadow: 0 -10px 0 rgba(90,58,46,0.18); }
+.counter::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 38%; background: repeating-linear-gradient(90deg, transparent 0 236px, rgba(90,58,46,0.18) 236px 242px), #A8D3CE; border-top: 8px solid #8FBFBA; }
+
+/* Title: cream fill, thick cocoa stroke, extruded */
+.title { position: absolute; transform: rotate(-4deg); text-align: center; line-height: 0.92; }
+.title .merge { display: block; color: #FFF7EC; -webkit-text-stroke: calc(18px * var(--u)) #5A3A2E; paint-order: stroke fill; text-shadow: 0 calc(14px * var(--u)) 0 #5A3A2E, 0 calc(22px * var(--u)) 0 #C24E35, 0 calc(30px * var(--u)) calc(30px * var(--u)) rgba(90,58,46,0.35); letter-spacing: 2px; }
+.title .munch { display: inline-block; color: #FFC94D; -webkit-text-stroke: calc(14px * var(--u)) #5A3A2E; paint-order: stroke fill; text-shadow: 0 calc(10px * var(--u)) 0 #5A3A2E, 0 calc(18px * var(--u)) calc(20px * var(--u)) rgba(90,58,46,0.35); }
+
+.bunny, .food, .burst, .spark, .glow { position: absolute; }
+.glow { border-radius: 50%; background: radial-gradient(circle, rgba(255,250,220,0.9), rgba(255,250,220,0) 65%); }
+.food { filter: drop-shadow(0 calc(16px * var(--u)) calc(10px * var(--u)) rgba(90,58,46,0.35)); }
+.bunny { filter: drop-shadow(0 calc(18px * var(--u)) calc(14px * var(--u)) rgba(90,58,46,0.3)); }
+.burst { display: flex; align-items: center; justify-content: center; background: #FFC94D; clip-path: polygon(50% 0%, 61% 18%, 82% 9%, 79% 31%, 100% 38%, 84% 54%, 96% 74%, 73% 75%, 67% 97%, 50% 84%, 33% 97%, 27% 75%, 4% 74%, 16% 54%, 0% 38%, 21% 31%, 18% 9%, 39% 18%); color: #5A3A2E; transform: rotate(10deg); }
+.burst span { color: #FFF7EC; -webkit-text-stroke: calc(9px * var(--u)) #5A3A2E; paint-order: stroke fill; }
+.spark { background: #FFFFFF; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); }
+</style>
+</head>
+<body>
+<script>document.body.className = (location.hash || '#portrait').slice(1);</script>
+
+<!-- Portrait 9:16 -->
+<div class="cover portrait">
+  <div class="bg"></div><div class="rays"></div><div class="dots"></div>
+  <div class="glow" style="left: 140px; top: 470px; width: 800px; height: 800px"></div>
+  <div class="title" style="left: 0; right: 0; top: 110px"><span class="merge" style="font-size: 270px">MERGE</span><span class="munch" style="font-size: 150px; margin-top: 18px">&amp; MUNCH</span></div>
+  <img class="bunny" src="bunny.png" alt="" style="left: 150px; top: 560px; width: 780px">
+  <img class="food" src="renders/pumpkin.png" alt="" style="left: 330px; top: 1000px; width: 420px; transform: rotate(-10deg)">
+  <div class="counter" style="height: 430px"></div>
+  <img class="food" src="renders/watermelon.png" alt="" style="left: -70px; top: 1300px; width: 520px; transform: rotate(12deg)">
+  <img class="food" src="renders/burger.png" alt="" style="left: 600px; top: 1300px; width: 540px; transform: rotate(-8deg)">
+  <img class="food" src="renders/pear.png" alt="" style="left: 300px; top: 1360px; width: 470px; transform: rotate(6deg)">
+  <img class="food" src="renders/apple.png" alt="" style="left: 120px; top: 1560px; width: 330px">
+  <img class="food" src="renders/carrot.png" alt="" style="left: 650px; top: 1560px; width: 330px; transform: rotate(-30deg)">
+  <div class="burst" style="left: 700px; top: 860px; width: 300px; height: 300px"><span style="font-size: 92px">+256</span></div>
+  <div class="spark" style="left: 120px; top: 760px; width: 90px; height: 90px"></div>
+  <div class="spark" style="left: 900px; top: 640px; width: 70px; height: 70px"></div>
+  <div class="spark" style="left: 250px; top: 1180px; width: 60px; height: 60px"></div>
+  <div class="spark" style="left: 860px; top: 1220px; width: 80px; height: 80px"></div>
+</div>
+
+<!-- Square 1:1 -->
+<div class="cover square">
+  <div class="bg"></div><div class="rays"></div><div class="dots"></div>
+  <div class="glow" style="left: 170px; top: 250px; width: 460px; height: 460px"></div>
+  <div class="title" style="left: 0; right: 0; top: 34px"><span class="merge" style="font-size: 168px">MERGE</span><span class="munch" style="font-size: 96px; margin-top: 8px">&amp; MUNCH</span></div>
+  <img class="bunny" src="bunny.png" alt="" style="left: 215px; top: 282px; width: 370px">
+  <div class="counter" style="height: 150px"></div>
+  <img class="food" src="renders/watermelon.png" alt="" style="left: -50px; top: 520px; width: 290px; transform: rotate(12deg)">
+  <img class="food" src="renders/burger.png" alt="" style="left: 560px; top: 530px; width: 290px; transform: rotate(-8deg)">
+  <img class="food" src="renders/pumpkin.png" alt="" style="left: 290px; top: 548px; width: 220px; transform: rotate(-10deg)">
+  <div class="burst" style="left: 590px; top: 285px; width: 170px; height: 170px"><span style="font-size: 52px">+256</span></div>
+  <div class="spark" style="left: 70px; top: 330px; width: 54px; height: 54px"></div>
+  <div class="spark" style="left: 175px; top: 470px; width: 34px; height: 34px"></div>
+  <div class="spark" style="left: 640px; top: 480px; width: 40px; height: 40px"></div>
+</div>
+
+<!-- Landscape 16:9 -->
+<div class="cover landscape">
+  <div class="bg"></div><div class="rays"></div><div class="dots"></div>
+  <div class="glow" style="left: 900px; top: 50px; width: 820px; height: 820px"></div>
+  <div class="title" style="left: 90px; width: 820px; top: 230px"><span class="merge" style="font-size: 250px">MERGE</span><span class="munch" style="font-size: 140px; margin-top: 16px">&amp; MUNCH</span></div>
+  <img class="bunny" src="bunny.png" alt="" style="left: 990px; top: 60px; width: 660px">
+  <img class="food" src="renders/pumpkin.png" alt="" style="left: 1150px; top: 440px; width: 360px; transform: rotate(-10deg)">
+  <div class="counter" style="height: 260px"></div>
+  <img class="food" src="renders/watermelon.png" alt="" style="left: 880px; top: 640px; width: 380px; transform: rotate(12deg)">
+  <img class="food" src="renders/burger.png" alt="" style="left: 1480px; top: 620px; width: 440px; transform: rotate(-8deg)">
+  <img class="food" src="renders/pear.png" alt="" style="left: 1230px; top: 690px; width: 340px; transform: rotate(6deg)">
+  <img class="food" src="renders/carrot.png" alt="" style="left: 140px; top: 760px; width: 300px; transform: rotate(-30deg)">
+  <img class="food" src="renders/apple.png" alt="" style="left: 420px; top: 790px; width: 260px">
+  <div class="burst" style="left: 1610px; top: 300px; width: 250px; height: 250px"><span style="font-size: 76px">+256</span></div>
+  <div class="spark" style="left: 960px; top: 160px; width: 80px; height: 80px"></div>
+  <div class="spark" style="left: 1760px; top: 120px; width: 60px; height: 60px"></div>
+  <div class="spark" style="left: 820px; top: 600px; width: 54px; height: 54px"></div>
+</div>
+</body>
+</html>

@@ -29,9 +29,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Score = 0;
-        highScore = PlayerPrefs.GetInt("HighScore");
-        dailyHighScore = PlayerPrefs.GetInt("DailyHighScore");
-        highScoreMesh.text = highScore.ToString();
+        StartCoroutine(LoadHighScores());
 
         playerController = FindObjectOfType<PlayerController>();
         uiManager = FindObjectOfType<UIManager>();
@@ -39,6 +37,18 @@ public class GameManager : MonoBehaviour
         GameObject mergeSoundsManager = GameObject.FindGameObjectWithTag("MergeSoundManager");
         if (mergeSoundsManager != null)
             mergeSoundSource = mergeSoundsManager.GetComponent<AudioSource>();
+    }
+
+    // On web the saved scores arrive from Bridge Storage a moment after play has already started.
+    IEnumerator LoadHighScores()
+    {
+        while (!GamePrefs.Ready)
+            yield return null;
+
+        highScore = Mathf.Max(highScore, GamePrefs.GetInt("HighScore"));
+        dailyHighScore = Mathf.Max(dailyHighScore, GamePrefs.GetInt("DailyHighScore"));
+        highScoreMesh.text = UIManager.Format(Mathf.Max(highScore, Score));
+        highScoreLoaded = true;
     }
 
     public void RegisterMergeObject(GameObject obj)
@@ -54,6 +64,12 @@ public class GameManager : MonoBehaviour
 
     bool isGameOver;
 
+    public bool IsGameOver => isGameOver;
+    bool bestCelebrated, highScoreLoaded;
+    public int HighScore => highScore;
+    // The run that just ended beat the stored best.
+    public bool NewBest { get; private set; }
+
     public void GameOver()
     {
         if (isGameOver)
@@ -67,13 +83,45 @@ public class GameManager : MonoBehaviour
         DangerZoneFeedback.Instance?.Reset();
         CameraShake.Instance?.StopDangerShake();
 
+        PlaygamaService.SendLevel(PlaygamaService.Level.Failed);
         StartCoroutine(EndGameSequent());
+    }
+
+    // Rewarded continue: the board was already cleared by the end sequence, so play resumes
+    // with the banked score and a fresh object in the drop box.
+    public void ContinueRun()
+    {
+        if (!isGameOver)
+            return;
+
+        isGameOver = false;
+        FindObjectOfType<TriggerLoss>()?.ResetLoss();
+        FindObjectOfType<ObjectSpawner>()?.EnsureHeldObject();
+
+        if (playerController != null)
+            playerController.controller = true;
+
+        PlaygamaService.SendLevel(PlaygamaService.Level.Started);
     }
 
     public void AddScore(int scorePoint)
     {
         Score += scorePoint;
-        scoreMesh.text = Score.ToString();
+        if (uiManager != null)
+            uiManager.AnimateScore(Score);
+        else
+            scoreMesh.text = UIManager.Format(Score);
+
+        // Passing the stored best shows live on the HUD; the first time in a run gets a celebration.
+        if (Score > highScore)
+        {
+            highScoreMesh.text = UIManager.Format(Score);
+            if (!bestCelebrated && highScoreLoaded && highScore > 0 && !isGameOver)
+            {
+                bestCelebrated = true;
+                uiManager?.CelebrateBest();
+            }
+        }
     }
 
     public int CurrentScore => Score;
@@ -83,7 +131,9 @@ public class GameManager : MonoBehaviour
         if (Score > highScore)
         {
             highScore = Score;
-            PlayerPrefs.SetInt("HighScore", highScore);
+            NewBest = true;
+            highScoreMesh.text = UIManager.Format(highScore);
+            GamePrefs.SetInt("HighScore", highScore);
         }
     }
 
@@ -92,7 +142,7 @@ public class GameManager : MonoBehaviour
         if (Score > dailyHighScore)
         {
             dailyHighScore = Score;
-            PlayerPrefs.SetInt("DailyHighScore", dailyHighScore);
+            GamePrefs.SetInt("DailyHighScore", dailyHighScore);
         }
     }
 
@@ -138,10 +188,13 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         SettingHighScore();
         SettingDailyHighScore();
-        restartSceneScoreMesh.text = Score.ToString();
+        GamePrefs.Save();
+        restartSceneScoreMesh.text = UIManager.Format(Score);
 
+#if UNITY_ANDROID || UNITY_IOS
         if (HapticFeedback.IsEnabled)
             Handheld.Vibrate();
+#endif
 
         if (uiManager != null)
             uiManager.GameOverScene();

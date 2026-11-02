@@ -44,7 +44,10 @@ public class WorldTimeAPI : MonoBehaviour
 
     void Start()
     {
+        // Web portals forbid requests to third-party hosts; the device clock is used there.
+#if !UNITY_WEBGL
         StartCoroutine(GetRealDateTimeFromAPI());
+#endif
     }
 
     public DateTime GetCurrentDateTime()

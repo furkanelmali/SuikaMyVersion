@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "UnityMCP": {
+      "type": "stdio",
+      "command": "/opt/homebrew/bin/uvx",
+      "args": ["--from", "mcpforunityserver==10.0.0", "mcp-for-unity", "--transport", "stdio"],
+      "env": { "UNITY_MCP_DEFAULT_INSTANCE": "SuikaMyVersion" }
+    }
+  }
+}

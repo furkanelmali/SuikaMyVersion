@@ -6,8 +6,8 @@ public static class HapticFeedback
 
     public static bool IsEnabled
     {
-        get => PlayerPrefs.GetInt(PrefKey, 1) == 1;
-        set => PlayerPrefs.SetInt(PrefKey, value ? 1 : 0);
+        get => GamePrefs.GetInt(PrefKey, 1) == 1;
+        set => GamePrefs.SetInt(PrefKey, value ? 1 : 0);
     }
 
     public static void VibrateLight()

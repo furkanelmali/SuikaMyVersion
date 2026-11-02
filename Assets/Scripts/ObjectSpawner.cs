@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class ObjectSpawner : MonoBehaviour
@@ -54,6 +55,22 @@ public class ObjectSpawner : MonoBehaviour
         spawnCoroutine = StartCoroutine(DelayedSpawn());
     }
 
+    // After a rewarded continue the end sequence has released the held object; hand the player a new one.
+    public void EnsureHeldObject()
+    {
+        if (spawnCoroutine != null)
+            return;
+
+        GameObject held = playerController != null ? playerController.currentFallObject : null;
+        if (held != null && held.activeInHierarchy)
+        {
+            playerController.AssignCurrentObject(held);
+            return;
+        }
+
+        SpawnObject(spawnPosition.position, spawnRotation);
+    }
+
     public void SpawnObject(Vector3 position, Quaternion rotation)
     {
         spawnNumber = nextObjectSpawning;
@@ -73,6 +90,18 @@ public class ObjectSpawner : MonoBehaviour
         spawnedObject.transform.rotation = rotation;
         ObjectController objectController = spawnedObject.GetComponent<ObjectController>();
         currentObjectDimension = objectController != null ? objectController.objectDimension : 0f;
+
+        // The new piece pops into the dropper, which gives a little bounce.
+        Transform piece = spawnedObject.transform;
+        Vector3 scale = piece.localScale;
+        piece.DOKill(true);
+        piece.localScale = scale * 0.2f;
+        piece.DOScale(scale, 0.32f).SetEase(Ease.OutBack, 2.5f);
+        if (dropBox != null)
+        {
+            dropBox.transform.DOKill(true);
+            dropBox.transform.DOPunchScale(new Vector3(-0.08f, 0.1f, 0f), 0.3f, 6, 0.5f);
+        }
 
         if (playerController != null)
             playerController.AssignCurrentObject(spawnedObject);
@@ -101,5 +130,17 @@ public class ObjectSpawner : MonoBehaviour
     {
         for (int i = 0; i < 5; i++)
             nextObjectImages[i].SetActive(i == nextObjectSpawning);
+
+        // The NEXT bubble bounces and the new preview pops in.
+        Transform preview = nextObjectImages[nextObjectSpawning].transform;
+        preview.DOKill(true);
+        preview.localScale = Vector3.zero;
+        preview.DOScale(1f, 0.35f).SetEase(Ease.OutBack, 2.5f).SetUpdate(true);
+        Transform bubble = preview.parent;
+        if (bubble != null)
+        {
+            bubble.DOKill(true);
+            bubble.DOPunchScale(Vector3.one * 0.16f, 0.35f, 6, 0.6f).SetUpdate(true);
+        }
     }
 }

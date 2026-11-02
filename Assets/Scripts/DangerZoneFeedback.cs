@@ -22,7 +22,8 @@ public class DangerZoneFeedback : MonoBehaviour
     {
         _instance = this;
 
-        if (dangerLineImage == null)
+        // The world-space LimitLine marks the real loss height; the old screen-fixed UI line is only a fallback.
+        if (dangerLineImage == null && FindObjectOfType<LimitLine>() == null)
             CreateDangerLine();
 
         if (vignetteImage == null)
@@ -40,12 +41,13 @@ public class DangerZoneFeedback : MonoBehaviour
 
     void CreateDangerLine()
     {
-        Canvas canvas = FindObjectOfType<Canvas>();
-        if (canvas == null)
+        // The UI's FX layer sits above the HUD and below the menus.
+        Transform layer = UIManager.FxLayer != null ? UIManager.FxLayer : FindObjectOfType<Canvas>()?.transform;
+        if (layer == null)
             return;
 
         GameObject line = new GameObject("DangerLine", typeof(RectTransform), typeof(Image));
-        line.transform.SetParent(canvas.transform, false);
+        line.transform.SetParent(layer, false);
 
         RectTransform rect = line.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0f, 1f);
@@ -61,12 +63,13 @@ public class DangerZoneFeedback : MonoBehaviour
 
     void CreateVignette()
     {
-        Canvas canvas = FindObjectOfType<Canvas>();
-        if (canvas == null)
+        // The UI's FX layer sits above the HUD and below the menus.
+        Transform layer = UIManager.FxLayer != null ? UIManager.FxLayer : FindObjectOfType<Canvas>()?.transform;
+        if (layer == null)
             return;
 
         GameObject go = new GameObject("DangerVignette", typeof(RectTransform), typeof(Image));
-        go.transform.SetParent(canvas.transform, false);
+        go.transform.SetParent(layer, false);
         go.transform.SetAsLastSibling();
 
         RectTransform rect = go.GetComponent<RectTransform>();
@@ -120,6 +123,7 @@ public class DangerZoneFeedback : MonoBehaviour
     {
         active = true;
         float ratio = Mathf.Clamp01(stayTime / maxTime);
+        LimitLine.Instance?.SetDanger(ratio);
 
         // Danger line
         if (dangerLineImage != null)
@@ -169,6 +173,7 @@ public class DangerZoneFeedback : MonoBehaviour
 
         active = false;
         SetLineAlpha(0f);
+        LimitLine.Instance?.SetDanger(0f);
 
         if (vignetteImage != null)
         {

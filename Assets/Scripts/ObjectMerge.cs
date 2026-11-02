@@ -142,7 +142,9 @@ public class ObjectMerge : MonoBehaviour
         if (mergeSoundSource == null)
             return;
 
-        mergeSoundSource.pitch = Random.Range(0.95f, 1.05f);
+        // Chained merges climb in pitch.
+        float combo = MergeJuice.Instance != null ? MergeJuice.Instance.ComboPitch : 1f;
+        mergeSoundSource.pitch = Random.Range(0.95f, 1.05f) * combo;
 
         if (clips != null && clips.Length > 0)
         {

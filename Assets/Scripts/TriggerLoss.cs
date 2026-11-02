@@ -66,6 +66,15 @@ public class TriggerLoss : MonoBehaviour
         }
     }
 
+    // Rewarded continue: the zone is empty again and may end the run a second time.
+    public void ResetLoss()
+    {
+        objectsInZone.Clear();
+        stayTime = 0f;
+        gameOverTriggered = false;
+        DangerZoneFeedback.Instance?.Reset();
+    }
+
     static bool IsValidMergeObject(Collider other)
     {
         if (other == null || !other.CompareTag("MergeObject"))

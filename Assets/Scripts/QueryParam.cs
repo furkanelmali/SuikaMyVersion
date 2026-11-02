@@ -8,6 +8,9 @@ public class QueryParam : MonoBehaviour
     void Start()
     {
         string url = Application.absoluteURL;
+        // Empty outside the browser; new Uri("") would throw.
+        if (string.IsNullOrEmpty(url))
+            return;
         Debug.Log("Current URL: " + url);
 
         Dictionary<string, string> queryParams = GetQueryParams(url);
