@@ -12,7 +12,7 @@ using UnityEngine;
 /// </summary>
 public static class PlaygamaWebBuild
 {
-    public const string Version = "1.0";
+    public const string Version = "1.1";
     const string Scene = "Assets/Scenes/SampleScene.unity";
     static string Root => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Builds", "Playgama"));
     public static string Output => Path.Combine(Root, "WebGL");

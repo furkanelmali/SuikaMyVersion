@@ -81,7 +81,8 @@ public class ObjectMerge : MonoBehaviour
         if (controller == null || otherObject.controller == null)
             return;
 
-        if (controller.rank != 11 && otherObject.controller.rank == controller.rank)
+        // A piece mid-pop (game over, rewarded cleanup) is on its way out and can't merge.
+        if (controller.rank != 11 && otherObject.controller.rank == controller.rank && !controller.isDead && !otherObject.controller.isDead)
         {
             if (hasMerged || otherObject.hasMerged)
                 return;
@@ -112,6 +113,7 @@ public class ObjectMerge : MonoBehaviour
                         c.enabled = true;
 
                     MergeJuice.Instance?.PlayMergeEffects(mergedObject, mergedRank, scoreGained);
+                    UIManager.Instance?.OnPieceMerged(mergedRank + 1);
                 }
             }
 

@@ -22,6 +22,17 @@ public class AdsManager : MonoBehaviour
     // Placement ids; the web ones are declared in Assets/WebGLTemplates/Bridge/playgama-bridge-config.json.
     public const string GameOverPlacement = "game_over";
     public const string ContinuePlacement = "continue";
+    public const string BreakPlacement = "chef_break";
+    public const string PauseExitPlacement = "pause_exit";
+    public const string CleanupPlacement = "cleanup";
+
+    // Master switch for the chef's break card; false leaves every other ad untouched.
+    public static readonly bool BreakCardsEnabled = true;
+
+    // Seconds of actual play since the last ad or break card; the break card waits on this.
+    public float PlaySinceAd { get; private set; }
+    public void TickPlay(float seconds) => PlaySinceAd += seconds;
+    public void ResetPlaySinceAd() => PlaySinceAd = 0f;
 
     public event Action OnInterstitialClosed;
     public event Action OnInterstitialFailed;
@@ -48,6 +59,7 @@ public class AdsManager : MonoBehaviour
     bool busy;
 
     public bool RewardedSupported => Bridge.advertisement.isRewardedSupported;
+    public bool BreakAdsSupported => Bridge.advertisement.isInterstitialSupported;
     public bool Busy => busy;
 
     public void ShowBanner() { }
@@ -78,6 +90,7 @@ public class AdsManager : MonoBehaviour
             if (state == InterstitialState.Opened)
             {
                 opened = true;
+                ResetPlaySinceAd();
                 PlaygamaService.SetAdOpen(true);
             }
             else if (state == InterstitialState.Closed || state == InterstitialState.Failed)
@@ -129,6 +142,7 @@ public class AdsManager : MonoBehaviour
             if (state == RewardedState.Opened)
             {
                 opened = true;
+                ResetPlaySinceAd();
                 PlaygamaService.SetAdOpen(true);
             }
             else if (state == RewardedState.Rewarded)
@@ -187,8 +201,10 @@ public class AdsManager : MonoBehaviour
     float interstitialFallbackTimer;
     bool interstitialFinishNotified;
 
-    // Mobile builds have no rewarded unit; the continue offer stays hidden there.
+    // Mobile builds have no rewarded unit; the continue and cleanup offers stay hidden there.
     public bool RewardedSupported => false;
+    // The break card and pause exit ads are web only; mobile keeps its game over interstitial.
+    public bool BreakAdsSupported => false;
     public bool Busy => false;
 
     public void ShowRewarded(string placement, Action onRewarded, Action onDone)

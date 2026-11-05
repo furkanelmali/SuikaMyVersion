@@ -4,13 +4,16 @@
         "interstitial": {
             "preloadOnStart": true,
             "placements": [
-                { "id": "game_over" }
+                { "id": "game_over" },
+                { "id": "chef_break" },
+                { "id": "pause_exit" }
             ]
         },
         "rewarded": {
             "preloadOnStart": true,
             "placements": [
-                { "id": "continue" }
+                { "id": "continue" },
+                { "id": "cleanup" }
             ]
         },
         "useBuiltInErrorPopup": true,

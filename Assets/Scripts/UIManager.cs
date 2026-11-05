@@ -66,6 +66,12 @@ public class UIManager : MonoBehaviour
     public GameObject continueButton;
     public Button playAgainButton, gameOverHomeButton, gameOverRankingButton;
 
+    [Header("Ad breaks")]
+    public GameObject breakPanel;
+    public TMP_Text breakHeadline, breakScore;
+    public Button breakContinueButton;
+    public GameObject cleanupButton;
+
     [Header("Leaderboard")]
     public Button leaderboardCloseButton;
     public RowView[] leaderboardRows;
@@ -97,12 +103,33 @@ public class UIManager : MonoBehaviour
     public static Transform FxLayer { get; private set; }
     public static TMP_FontAsset UiFont { get; private set; }
 
-    enum UiScreen { Menu, Playing, Paused, GameOverWait, GameOver, Leaderboard }
+    // AdWait: HUD up, play frozen, while an ad the player asked for or tapped through loads and runs.
+    enum UiScreen { Menu, Playing, Paused, GameOverWait, GameOver, Leaderboard, Break, AdWait }
+
+    // The chef's break: after this much play without an ad, the next big merge ends in a card with a Continue button.
+    const float BreakIntervalSeconds = 180f;
+    const int BreakMinRank = 5;
+    const float BreakSettleSeconds = 0.6f;
+    // The spawner hands out ranks up to this one, so only higher ranks are new to the player.
+    const int SpawnedTopRank = 5;
+
+    const int CleanupPieces = 8;
+    const int CleanupMinPieces = 10;
+    const float CleanupCooldownSeconds = 150f;
+    const float CleanupRetrySeconds = 10f;
 
     static bool openMenuOnLoad;
     UiScreen screen;
     UiScreen leaderboardReturn;
-    bool runStarted, levelPaused, continueUsed, continueFlow, waitingForInterstitial, bannerShown;
+    bool runStarted, levelPaused, continueUsed, continueFlow, bannerShown;
+    Action afterInterstitial;
+    bool breakPending, breakNewDish;
+    float breakMergeTime;
+    int runBestRank = SpawnedTopRank;
+    float cleanupReadyAt;
+    bool? cleanupSupported;
+    bool cleanupWasInDanger;
+    TriggerLoss lossZone;
     bool soundOn = true, musicOn = true;
     int leaderboardRequest;
     int shownMenuBest = -1;
@@ -128,6 +155,7 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         playerController = FindObjectOfType<PlayerController>();
+        lossZone = FindObjectOfType<TriggerLoss>();
         PostProcessVolume volume = FindObjectOfType<PostProcessVolume>();
         if (volume != null)
             volume.profile.TryGetSettings(out depthOfField);
@@ -164,10 +192,14 @@ public class UIManager : MonoBehaviour
     {
         pauseButton.onClick.AddListener(Pause);
         resumeButton.onClick.AddListener(Resume);
-        pauseRestartButton.onClick.AddListener(Restart);
-        pauseHomeButton.onClick.AddListener(MainMenuBtn);
+        pauseRestartButton.onClick.AddListener(() => LeavePause(Restart));
+        pauseHomeButton.onClick.AddListener(() => LeavePause(MainMenuBtn));
         pauseSound.button.onClick.AddListener(ToggleSound);
         pauseMusic.button.onClick.AddListener(ToggleMusic);
+
+        breakContinueButton.onClick.AddListener(ContinueFromBreak);
+        cleanupButton.GetComponentInChildren<Button>(true).onClick.AddListener(WatchAndCleanup);
+        cleanupButton.SetActive(false);
 
         continueButton.GetComponentInChildren<Button>(true).onClick.AddListener(WatchAndContinue);
         playAgainButton.onClick.AddListener(Restart);
@@ -203,7 +235,9 @@ public class UIManager : MonoBehaviour
         scoreCount?.Kill();
         scoreCount = DOTween.To(() => shownScore, v => { shownScore = v; hudScore.text = Format(v); }, score, 0.35f)
             .SetEase(Ease.OutCubic).SetUpdate(true);
-        hudScoreCard.DOComplete();
+        // Scores can land several times a frame; a punch restarted from its base scale can't creep upward.
+        hudScoreCard.DOKill();
+        hudScoreCard.localScale = Vector3.one;
         hudScoreCard.DOPunchScale(Vector3.one * 0.08f, 0.25f, 5, 0.6f).SetUpdate(true);
     }
 
@@ -295,6 +329,8 @@ public class UIManager : MonoBehaviour
             shownMenuBest = GameManager.Instance.HighScore;
             menuBest.text = Format(shownMenuBest);
         }
+
+        UpdateAdBreaks();
     }
 
     // ---------- screens ----------
@@ -307,6 +343,7 @@ public class UIManager : MonoBehaviour
         pausePanel.SetActive(next == UiScreen.Paused);
         gameOverPanel.SetActive(next == UiScreen.GameOver);
         leaderboardPanel.SetActive(next == UiScreen.Leaderboard);
+        breakPanel.SetActive(next == UiScreen.Break);
         mainMenuPanel.SetActive(next == UiScreen.Menu);
 
         bool playing = next == UiScreen.Playing;
@@ -342,8 +379,11 @@ public class UIManager : MonoBehaviour
 
     public void Pause()
     {
-        if (screen == UiScreen.Playing)
-            SetScreen(UiScreen.Paused);
+        if (screen != UiScreen.Playing)
+            return;
+        // A card right after Resume would feel like a trap; the next big merge asks again.
+        breakPending = false;
+        SetScreen(UiScreen.Paused);
     }
 
     public void Resume()
@@ -363,7 +403,7 @@ public class UIManager : MonoBehaviour
     // The pause panel, a hidden tab or a full-screen ad freezes physics and the loss timer.
     void ApplyTimeScale()
     {
-        bool paused = screen == UiScreen.Paused;
+        bool paused = screen == UiScreen.Paused || screen == UiScreen.Break || screen == UiScreen.AdWait;
         Time.timeScale = paused || PlaygamaService.ExternalPause ? 0f : 1f;
 
         if (paused != levelPaused)
@@ -373,25 +413,148 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // ---------- game over ----------
+    // ---------- ad breaks ----------
 
-    // Called by GameManager once the end sequence has finished.
-    public void GameOverScene()
+    // Runs next once the ad closed, failed or was skipped by Bridge's minimum interval.
+    void ShowInterstitialThen(string placement, Action next)
     {
-        waitingForInterstitial = true;
-        LeaderboardService.Submit(GameManager.Instance != null ? GameManager.Instance.HighScore : 0);
-
-        bool shown = AdsManager.Instance != null && AdsManager.Instance.TryShowInterstitial(AdsManager.GameOverPlacement);
-        if (!shown)
+        afterInterstitial = next;
+        if (AdsManager.Instance == null || !AdsManager.Instance.TryShowInterstitial(placement))
             OnInterstitialClosed();
     }
 
     void OnInterstitialClosed()
     {
-        if (!waitingForInterstitial)
+        Action next = afterInterstitial;
+        afterInterstitial = null;
+        next?.Invoke();
+    }
+
+    // Pause menu: Restart and Home end the current moment of play, so an ad can run before leaving.
+    void LeavePause(Action leave)
+    {
+        if (screen != UiScreen.Paused)
             return;
-        waitingForInterstitial = false;
-        SetScreen(UiScreen.GameOver);
+        if (AdsManager.Instance == null || !AdsManager.Instance.BreakAdsSupported)
+        {
+            leave();
+            return;
+        }
+        SetScreen(UiScreen.AdWait);
+        ShowInterstitialThen(AdsManager.PauseExitPlacement, leave);
+    }
+
+    // Called for every merge with the rank of the piece it created.
+    public void OnPieceMerged(int newRank)
+    {
+        bool newDish = newRank > runBestRank;
+        runBestRank = Mathf.Max(runBestRank, newRank);
+
+        AdsManager ads = AdsManager.Instance;
+        if (breakPending || screen != UiScreen.Playing || newRank < BreakMinRank || !AdsManager.BreakCardsEnabled)
+            return;
+        if (ads == null || ads.PlaySinceAd < BreakIntervalSeconds || !ads.BreakAdsSupported)
+            return;
+
+        breakPending = true;
+        breakNewDish = newDish;
+        breakMergeTime = Time.time;
+    }
+
+    void UpdateAdBreaks()
+    {
+        AdsManager ads = AdsManager.Instance;
+        GameManager game = GameManager.Instance;
+        bool playing = screen == UiScreen.Playing && ads != null && game != null && !game.IsGameOver;
+        if (playing)
+            ads.TickPlay(Time.deltaTime);
+
+        UpdateCleanupButton(playing, ads, game);
+
+        // The card only opens on a calm board with no piece in the player's hand.
+        if (!playing || !breakPending || Time.time - breakMergeTime < BreakSettleSeconds)
+            return;
+        if ((lossZone != null && lossZone.InDanger) || (playerController != null && playerController.IsDragging))
+            return;
+
+        breakPending = false;
+        ads.ResetPlaySinceAd();
+        breakHeadline.text = breakNewDish ? "NEW DISH UNLOCKED!" : "YOU'RE ON A ROLL!";
+        breakScore.text = Format(game.CurrentScore);
+        SetScreen(UiScreen.Break);
+    }
+
+    public void ContinueFromBreak()
+    {
+        if (screen != UiScreen.Break)
+            return;
+        SetScreen(UiScreen.AdWait);
+        ShowInterstitialThen(AdsManager.BreakPlacement, () => SetScreen(UiScreen.Playing));
+    }
+
+    void UpdateCleanupButton(bool playing, AdsManager ads, GameManager game)
+    {
+        bool show = playing && Time.time >= cleanupReadyAt && game.PieceCount >= CleanupMinPieces && !ads.Busy;
+        if (show)
+        {
+            if (cleanupSupported == null)
+                cleanupSupported = ads.RewardedSupported;
+            show = cleanupSupported.Value;
+        }
+
+        Transform button = cleanupButton.transform;
+        if (show != cleanupButton.activeSelf)
+        {
+            cleanupButton.SetActive(show);
+            if (show)
+            {
+                button.DOKill();
+                button.localScale = Vector3.zero;
+                button.DOScale(1f, 0.35f).SetEase(Ease.OutBack, 2f).SetUpdate(true);
+            }
+        }
+
+        // The offer bumps when the board reaches the limit line, the moment it is worth most.
+        bool danger = show && lossZone != null && lossZone.InDanger;
+        if (danger && !cleanupWasInDanger)
+        {
+            button.DOComplete();
+            button.DOPunchScale(Vector3.one * 0.18f, 0.5f, 6, 0.6f).SetUpdate(true);
+        }
+        cleanupWasInDanger = danger;
+    }
+
+    // Opt-in booster: watch an ad, the smallest pieces pop and the loss countdown restarts.
+    public void WatchAndCleanup()
+    {
+        AdsManager ads = AdsManager.Instance;
+        GameManager game = GameManager.Instance;
+        if (screen != UiScreen.Playing || ads == null || ads.Busy || game == null || game.IsGameOver)
+            return;
+        if (playerController != null && playerController.IsDragging)
+            return;
+
+        bool granted = false;
+        SetScreen(UiScreen.AdWait);
+        ads.ShowRewarded(AdsManager.CleanupPlacement, () => granted = true, () =>
+        {
+            cleanupReadyAt = Time.time + (granted ? CleanupCooldownSeconds : CleanupRetrySeconds);
+            SetScreen(UiScreen.Playing);
+            if (!granted)
+                return;
+            game.ClearSmallestPieces(CleanupPieces);
+            lossZone?.RestartCountdown();
+            ShowToast("ALL CLEAN!");
+        });
+    }
+
+    // ---------- game over ----------
+
+    // Called by GameManager once the end sequence has finished.
+    public void GameOverScene()
+    {
+        LeaderboardService.Submit(GameManager.Instance != null ? GameManager.Instance.HighScore : 0);
+        ShowInterstitialThen(AdsManager.GameOverPlacement, () => SetScreen(UiScreen.GameOver));
     }
 
     void RefreshGameOver()

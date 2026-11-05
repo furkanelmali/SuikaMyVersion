@@ -11,6 +11,8 @@ public class TriggerLoss : MonoBehaviour
 
     readonly HashSet<GameObject> objectsInZone = new HashSet<GameObject>();
 
+    public bool InDanger => stayTime > 0f;
+
     void Start()
     {
         if (CompareTag("MergeObject"))
@@ -72,6 +74,13 @@ public class TriggerLoss : MonoBehaviour
         objectsInZone.Clear();
         stayTime = 0f;
         gameOverTriggered = false;
+        DangerZoneFeedback.Instance?.Reset();
+    }
+
+    // Rewarded cleanup: pieces may still be in the zone, so they stay tracked and only the countdown restarts.
+    public void RestartCountdown()
+    {
+        stayTime = 0f;
         DangerZoneFeedback.Instance?.Reset();
     }
 

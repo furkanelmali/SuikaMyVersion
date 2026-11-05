@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
     public bool controller = true;
     public GameObject currentFallObject;
 
+    public bool IsDragging => state == ControlState.Dragging;
+
     [SerializeField] float dragFollowSpeed = 24f;
     [SerializeField] float edgeFeedbackCooldown = 0.15f;
     [SerializeField] float edgePunchScale = 0.035f;

@@ -107,6 +107,17 @@ public static class GameUIBuilder
         CenterPivot(next);
         SlideIn(next, new Vector2(240, 0), 0.1f);
 
+        // Rewarded cleanup offer: the text says an ad plays and what it gives. UIManager shows it once the board fills up.
+        RectTransform cleanupRect = Rect("CleanupOffer", hud, Corner.TopLeft, new Vector2(16, 138), new Vector2(150, 54));
+        CenterPivot(cleanupRect);
+        RectTransform cleanupBreath = Rect("Breath", cleanupRect, Corner.TopLeft, Vector2.zero, new Vector2(150, 54));
+        cleanupBreath.gameObject.AddComponent<UIBreathe>();
+        RectTransform cleanup = Lipped("Button", cleanupBreath, Corner.TopLeft, Vector2.zero, new Vector2(150, 54), Mint, MintLip, 5, 18);
+        Icon(cleanup, "icon_video", Color.white, new Vector2(11, 14), 26);
+        Label(cleanup, "Title", "CLEAN UP", 19, Color.white, new Vector2(44, 8), new Vector2(102, 22), TextAlignmentOptions.TopLeft);
+        Label(cleanup, "Hint", "WATCH AN AD", 11, new Color(1, 1, 1, 0.9f), new Vector2(45, 31), new Vector2(102, 14), TextAlignmentOptions.TopLeft);
+        MakeButton(cleanup);
+
         TMP_Text toast = Label(hud, "Toast", "COMBO x2", 38, Color.white, Vector2.zero, new Vector2(390, 60), TextAlignmentOptions.Center);
         RectTransform toastRect = toast.rectTransform;
         toastRect.anchorMin = toastRect.anchorMax = new Vector2(0.5f, 1f);
@@ -129,6 +140,21 @@ public static class GameUIBuilder
         Button pauseRestart = RoundWithLabel(pauseCard, "Restart", "icon_restart", "RESTART", new Vector2(160 - 48 - 30, 268), 60);
         Button pauseHome = RoundWithLabel(pauseCard, "Home", "icon_home", "HOME", new Vector2(160 + 48 - 30, 268), 60);
         Intro(pausePanel, pauseCard.Find("Title"), resume, pauseCard.Find("SoundToggle"), pauseCard.Find("MusicToggle"), pauseCard.Find("Restart"), pauseCard.Find("Home"));
+
+        // ---------- chef's break ----------
+        RectTransform breakPanel = Overlay("BreakPanel", root2, Dim);
+        RectTransform breakCard = Card("Card", breakPanel, 320, 276, 10);
+        RectTransform breakRibbon = Lipped("Ribbon", breakCard, Corner.TopCenter, new Vector2(0, -26), new Vector2(240, 54), Butter, ButterLip, 5, 18);
+        Label(breakRibbon, "Title", "CHEF'S BREAK", 28, Cocoa, Vector2.zero, new Vector2(240, 54), TextAlignmentOptions.Center);
+        TMP_Text breakHeadline = Label(breakCard, "Headline", "NEW DISH UNLOCKED!", 24, Coral, new Vector2(0, 42), new Vector2(320, 30), TextAlignmentOptions.Top);
+        TMP_Text breakScoreLabel = Label(breakCard, "ScoreLabel", "SCORE", 14, CocoaSoft, new Vector2(0, 80), new Vector2(320, 18), TextAlignmentOptions.Top, 1.5f);
+        TMP_Text breakScore = Label(breakCard, "Score", "0", 48, Cocoa, new Vector2(24, 98), new Vector2(272, 54), TextAlignmentOptions.Top);
+        AutoSize(breakScore, 26, 48);
+        RectTransform breakContinue = Lipped("ContinueButton", breakCard, Corner.TopLeft, new Vector2(24, 162), new Vector2(272, 64), Coral, CoralLip, 6, 22);
+        IconText(breakContinue, "icon_play", "CONTINUE", 28, Color.white, 24);
+        Button breakContinueButton = MakeButton(breakContinue);
+        TMP_Text breakHint = Label(breakCard, "Hint", "A SHORT AD MAY PLAY", 13, CocoaSoft, new Vector2(0, 240), new Vector2(320, 18), TextAlignmentOptions.Top, 1f);
+        Intro(breakPanel, breakHeadline.transform, breakScoreLabel.transform, breakScore.transform, breakContinue, breakHint.transform);
 
         // ---------- game over ----------
         RectTransform overPanel = Overlay("GameOverPanel", root2, Dim);
@@ -293,6 +319,11 @@ public static class GameUIBuilder
         ui.gameOverBest = overBest;
         ui.newBestChip = newBest.gameObject;
         ui.continueButton = continueRect.gameObject;
+        ui.breakPanel = breakPanel.gameObject;
+        ui.breakHeadline = breakHeadline;
+        ui.breakScore = breakScore;
+        ui.breakContinueButton = breakContinueButton;
+        ui.cleanupButton = cleanupRect.gameObject;
         ui.playAgainButton = playAgain;
         ui.gameOverHomeButton = overHome;
         ui.gameOverRankingButton = overRanking;
@@ -321,7 +352,7 @@ public static class GameUIBuilder
         spawner.nextObjectImages = previews;
         EditorUtility.SetDirty(spawner);
 
-        foreach (RectTransform panel in new[] { pausePanel, overPanel, boardPanel, menuPanel })
+        foreach (RectTransform panel in new[] { pausePanel, breakPanel, overPanel, boardPanel, menuPanel })
             panel.gameObject.SetActive(false);
 
         KitchenSceneBuilder.BuildInto(scene, spawner);
